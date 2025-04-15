@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今天吃什么大作战！</title>
+    <style>
+        :root {
+            --neon-pink: #FF00FF;
+            --electric-blue: #00FFFF;
+            --lime-green: #00FF00;
+            --violet: #FF00AA;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', cursive;
+            background: linear-gradient(45deg, var(--electric-blue), var(--neon-pink));
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: bgPulse 10s infinite;
+        }
+
+        @keyframes bgPulse {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .container {
+            background: rgba(255,255,255,0.9);
+            padding: 30px;
+            border-radius: 30px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            border: 4px dotted var(--violet);
+        }
+
+        h1 {
+            color: #FF0066;
+            font-size: 2.5em;
+            margin: 0 0 25px 0;
+            text-shadow: 3px 3px var(--lime-green);
+            animation: titleShake 0.5s infinite;
+        }
+
+        #result {
+            font-size: 2.2em;
+            margin: 30px 0;
+            padding: 25px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 20px;
+            border: 3px solid var(--neon-pink);
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s;
+        }
+
+        button {
+            font-size: 1.8em;
+            padding: 20px 40px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin: 15px;
+            background: linear-gradient(45deg, var(--lime-green), var(--electric-blue));
+            color: #FF0066;
+            text-shadow: 2px 2px white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        button:hover {
+            transform: scale(1.1) rotate(5deg);
+            filter: hue-rotate(90deg);
+        }
+
+        #stopBtn {
+            background: linear-gradient(45deg, var(--neon-pink), var(--violet));
+            display: none;
+        }
+
+        @keyframes titleShake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(3deg); }
+            75% { transform: rotate(-3deg); }
+        }
+
+        .emoji {
+            font-size: 1.5em;
+            animation: emojiJump 0.3s infinite;
+        }
+
+        @keyframes emojiJump {
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="title">🍔今天吃什么大作战！🍟</h1>
+        <div id="result">🎲点击开始！</div>
+        <button id="startBtn" onclick="startRandom()">⚡开始选择！</button>
+        <button id="stopBtn" onclick="stopRandom()">💥停止！</button>
+    </div>
+
+    <script>
+        const lunchFoods = [
+            "生煎🥟", "布袋馍🌯", "鸡公煲🍗", "牛肉面🍜", 
+            "冯胖剁椒面🌶️", "小许炒粉面🍝", "东区猪脚饭🐷", 
+            "老田的店🏠", "大铁牛螺蛳粉🐌", "西大街新疆饭🍢", 
+            "米村拌饭🍚", "烤肉🍖", "扶摇树下🌳", "火锅🍲", 
+            "麦当劳🍟", "胖哥俩👬", "昌盛麻辣烫🌶️", 
+            "鸡哩虾哺🦐", "昂贵的广东菜🦢", "万人叉烧🍖", 
+            "鸡架拌面🍗", "干锅鸭🦆", "文轩阁📚", 
+            "吃什么吃不准吃🤔", "馄饨🥟"
+        ];
+
+        const dinnerFoods = [
+            "馄饨🥟", "冒烤鸭🦆", "酱拌面🍜", "炒河粉🍝", 
+            "炒米🍚", "馍菜汤🥣", "轻食🥗", "西区超市烤冷面🥢", 
+            "自制酸奶燕麦🥛", "别吃了！🚫", "烧饼🥯", 
+            "烧饼夹菜🌮", "鸡蛋灌饼🍳", "手抓饼🌯", "肠粉🍲", 
+            "破街麻辣烫🌶️", "鸡叉骨🍗", "烤肠🌭", "渔粉🐟", 
+            "煎饼果子🌯"
+        ];
+
+        let intervalId;
+        const result = document.getElementById('result');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const title = document.getElementById('title');
+
+        function getCurrentMeal() {
+            const now = new Date();
+            const hours = now.getHours();
+            return (hours < 14) ? 
+                { type: "午餐🍱", foods: lunchFoods } : 
+                { type: "晚餐🍽️", foods: dinnerFoods };
+        }
+
+        function updateTitle() {
+            const meal = getCurrentMeal();
+            title.innerHTML = `${meal.type}大作战！${meal.type.includes("午") ? "☀️" : "🌙"}`;
+            return meal.foods;
+        }
+
+        function startRandom() {
+            const foods = updateTitle();
+            startBtn.style.display = 'none';
+            stopBtn.style.display = 'inline-block';
+            
+            intervalId = setInterval(() => {
+                const randomIndex = Math.floor(Math.random() * foods.length);
+                result.innerHTML = `<span style="color:hsl(${Math.random()*360},100%,50%)">${foods[randomIndex]}</span>`;
+            }, 10); // 超高速切换（10ms）
+        }
+
+        function stopRandom() {
+            clearInterval(intervalId);
+            startBtn.style.display = 'inline-block';
+            stopBtn.style.display = 'none';
+            result.style.animation = 'none';
+            void result.offsetWidth; // 触发重绘
+            result.style.animation = 'flash 0.5s';
+        }
+    </script>
+</body>
+</html>
